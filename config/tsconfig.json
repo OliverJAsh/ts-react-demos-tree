@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es6",
+        "strict": true,
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "sourceMap": true,
+        "jsx": "react",
+        "outDir": "./target/",
+        "rootDir": "./src/",
+        "plugins": [{ "name": "tslint-language-service" }]
+    },
+    "files": ["./src/webpack.config.ts"]
+}

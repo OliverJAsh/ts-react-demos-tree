@@ -11,6 +11,7 @@ type ComponentDemosParams = { componentName: string };
 type ComponentDemoParams = { demoName: string };
 
 // TODO: How to use SFC type with generic?
+// https://github.com/Microsoft/TypeScript/issues/27124
 const ComponentDemoComponent = <P extends {}>({
     Component,
     componentDemo,

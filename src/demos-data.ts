@@ -1,14 +1,13 @@
 import { demos as MyFooComponentDemos } from './MyFooComponent';
-import { Group, TreeTag } from './types';
+import { group } from './types';
 
-export const demos: Group<any> = {
-    tag: TreeTag.Group,
+export const demos = group({
     name: 'Root group',
     children: [
-        {
-            tag: TreeTag.Group,
+        group({
             name: 'Sub group',
             children: [MyFooComponentDemos],
-        },
+        }),
+        MyFooComponentDemos,
     ],
-};
+});

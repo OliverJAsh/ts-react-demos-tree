@@ -1,10 +1,21 @@
 import { findFirst } from 'fp-ts/lib/Array';
+import { option } from 'fp-ts/lib/Option';
 import * as React from 'react';
 import { ComponentType, SFC } from 'react';
 import { Link, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { demos } from './demos-data';
 import { createSubType, unsafeGet } from './helpers';
-import { ComponentDemo, ComponentDemos, Group, Tree, TreeTag } from './types';
+import {
+    checkIsComponentDemos,
+    checkIsGroup,
+    ComponentDemo,
+    ComponentDemos,
+    Group,
+    Tree,
+    TreeTag,
+    TreeTaggedComponentDemos,
+    TreeTaggedGroup,
+} from './types';
 
 type GroupParams = { groupName: string };
 type ComponentDemosParams = { componentName: string };
@@ -100,12 +111,12 @@ const ComponentDemosRouteComponent = createGenericSFC(
         const componentDemos = unsafeGet(
             findFirst(
                 parentGroup.children,
-                (tree): tree is ComponentDemos<P> =>
-                    tree.tag === TreeTag.ComponentDemos &&
-                    tree.name ===
+                (tree): tree is TreeTaggedComponentDemos<P> =>
+                    checkIsComponentDemos(tree) &&
+                    tree.value.name ===
                         routeComponentProps.match.params.componentName,
             ),
-        );
+        ).value;
         return (
             <div>
                 <Link to={url}>Component: {componentDemos.name}</Link>
@@ -142,14 +153,20 @@ const TreeListComponent = createGenericSFC(
                         switch (tree.tag) {
                             case TreeTag.Group:
                                 return (
-                                    <Link to={`${url}/group/${tree.name}`}>
-                                        Group: {tree.name}
+                                    <Link
+                                        to={`${url}/group/${tree.value.name}`}
+                                    >
+                                        Group: {tree.value.name}
                                     </Link>
                                 );
                             case TreeTag.ComponentDemos:
                                 return (
-                                    <Link to={`${url}/component/${tree.name}`}>
-                                        Component: {tree.name}
+                                    <Link
+                                        to={`${url}/component/${
+                                            tree.value.name
+                                        }`}
+                                    >
+                                        Component: {tree.value.name}
                                     </Link>
                                 );
                         }
@@ -217,15 +234,17 @@ const GroupRouteComponent = createGenericSFC(
         ...routeComponentProps
     }: { parentGroup: Group<P> } & RouteComponentProps<GroupParams>) => (
         <GroupComponent
-            group={unsafeGet(
-                findFirst(
-                    parentGroup.children,
-                    (tree): tree is Group<P> =>
-                        tree.tag === TreeTag.Group &&
-                        tree.name ===
-                            routeComponentProps.match.params.groupName,
-                ),
-            )}
+            group={
+                unsafeGet(
+                    findFirst(
+                        parentGroup.children,
+                        (tree): tree is TreeTaggedGroup<P> =>
+                            checkIsGroup(tree) &&
+                            tree.value.name ===
+                                routeComponentProps.match.params.groupName,
+                    ),
+                ).value
+            }
             {...routeComponentProps}
         />
     ),
@@ -233,6 +252,12 @@ const GroupRouteComponent = createGenericSFC(
 
 export const RootRouteComponent: SFC<
     RouteComponentProps<GroupParams>
-> = routeComponentProps => (
-    <GroupComponent group={demos} {...routeComponentProps} />
-);
+> = routeComponentProps => {
+    const rootGroup = unsafeGet(
+        option
+            .of(demos)
+            .refine(checkIsGroup)
+            .map(tagged => tagged.value),
+    );
+    return <GroupComponent group={rootGroup} {...routeComponentProps} />;
+};

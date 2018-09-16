@@ -1,12 +1,6 @@
 import { ComponentType } from 'react';
 
-export enum TreeTag {
-    Group = 'Group',
-    ComponentDemos = 'ComponentDemos',
-}
-
 export type Group<P> = {
-    tag: TreeTag.Group;
     name: string;
     children: Array<Tree<P>>;
 };
@@ -16,10 +10,41 @@ export type ComponentDemo<P> = {
     props: P;
 };
 export type ComponentDemos<P> = {
-    tag: TreeTag.ComponentDemos;
     Component: ComponentType<P>;
     name: string;
     demos: Array<ComponentDemo<P>>;
 };
 
-export type Tree<P> = Group<P> | ComponentDemos<P>;
+export enum TreeTag {
+    Group = 'Group',
+    ComponentDemos = 'ComponentDemos',
+}
+
+type TreeRecord<P> = {
+    [TreeTag.Group]: Group<P>;
+    [TreeTag.ComponentDemos]: ComponentDemos<P>;
+};
+
+type TreeTaggedRecord<P> = {
+    [Tag in keyof TreeRecord<P>]: { tag: Tag; value: TreeRecord<P>[Tag] }
+};
+
+export type Tree<P> = TreeTaggedRecord<P>[keyof TreeRecord<P>];
+
+// Constructors
+
+export const group = <P>(value: Group<P>): Tree<P> => ({ tag: TreeTag.Group, value });
+export const componentDemos = <P>(value: ComponentDemos<P>): Tree<P> => ({
+    tag: TreeTag.ComponentDemos,
+    value,
+});
+
+export type TreeTaggedGroup<P> = TreeTaggedRecord<P>['Group'];
+export type TreeTaggedComponentDemos<P> = TreeTaggedRecord<P>['ComponentDemos'];
+
+// Predicates
+
+export const checkIsGroup = <P>(tree: Tree<P>): tree is TreeTaggedGroup<P> =>
+    tree.tag === TreeTag.Group;
+export const checkIsComponentDemos = <P>(tree: Tree<P>): tree is TreeTaggedComponentDemos<P> =>
+    tree.tag === TreeTag.ComponentDemos;

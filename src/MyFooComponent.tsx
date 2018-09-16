@@ -1,12 +1,11 @@
 import { SFC } from 'react';
-import { ComponentDemos, TreeTag } from './types';
+import { componentDemos } from './types';
 import React = require('react');
 
 type Props = { name: string };
 const MyFooComponent: SFC<Props> = props => <div>{props.name}</div>;
 
-export const demos: ComponentDemos<Props> = {
-    tag: TreeTag.ComponentDemos,
+export const demos = componentDemos({
     Component: MyFooComponent,
     name: 'MyFooComponent',
     demos: [
@@ -23,4 +22,4 @@ export const demos: ComponentDemos<Props> = {
             },
         },
     ],
-};
+});

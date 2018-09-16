@@ -25,11 +25,9 @@ type TreeRecord<P> = {
     [TreeTag.ComponentDemos]: ComponentDemos<P>;
 };
 
-type TreeTaggedRecord<P> = {
-    [Tag in keyof TreeRecord<P>]: { tag: Tag; value: TreeRecord<P>[Tag] }
-};
+type TreeTaggedRecord<P> = { [Tag in TreeTag]: { tag: Tag; value: TreeRecord<P>[Tag] } };
 
-export type Tree<P> = TreeTaggedRecord<P>[keyof TreeRecord<P>];
+export type Tree<P> = TreeTaggedRecord<P>[TreeTag];
 
 // Constructors
 
